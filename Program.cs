@@ -1,42 +1,80 @@
-// Create the application builder
-// This sets up dependency injection, configuration, logging, etc.
+// ------------------------------------------------------------
+// Program.cs
+// Entry point of the .NET 8 Web API application
+// ------------------------------------------------------------
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+// ------------------------------------------------------------
+// 1️⃣ Create the application builder
+// ------------------------------------------------------------
+// This initializes:
+// - Dependency Injection (DI)
+// - Configuration (appsettings.json, env vars)
+// - Logging
+// - Kestrel web server
 var builder = WebApplication.CreateBuilder(args);
 
-// -------------------- SERVICES REGISTRATION --------------------
+// ------------------------------------------------------------
+// 2️⃣ Configure Kestrel (CRITICAL FOR DOCKER / ECS)
+// ------------------------------------------------------------
+// Listen on port 2535 on ALL network interfaces (0.0.0.0)
+//
+// Why?
+// - Docker containers do NOT use localhost
+// - ECS + ALB need the app exposed externally
+// - Matches Dockerfile EXPOSE 2535
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(2535);
+});
 
-// Register MVC controllers so routes like /api/workflows can work
+// ------------------------------------------------------------
+// 3️⃣ Register services (Dependency Injection)
+// ------------------------------------------------------------
+
+// Registers MVC controllers (enables [ApiController])
 builder.Services.AddControllers();
 
-// Required for Swagger endpoint discovery
+// Enables Swagger endpoint discovery
 builder.Services.AddEndpointsApiExplorer();
 
-// Registers Swagger generator
+// Generates Swagger/OpenAPI documentation
 builder.Services.AddSwaggerGen();
 
-// -------------------- BUILD APPLICATION --------------------
-
-// Build the application pipeline
+// ------------------------------------------------------------
+// 4️⃣ Build the application
+// ------------------------------------------------------------
+// Finalizes the service container and middleware pipeline
 var app = builder.Build();
 
-// -------------------- MIDDLEWARE CONFIGURATION --------------------
+// ------------------------------------------------------------
+// 5️⃣ Configure middleware (HTTP pipeline)
+// ------------------------------------------------------------
 
-// Enable Swagger JSON endpoint
+// Enables Swagger JSON endpoint (/swagger/v1/swagger.json)
 app.UseSwagger();
 
-// Enable Swagger UI (browser-based API testing)
+// Enables Swagger UI (/swagger)
 app.UseSwaggerUI();
 
-// Enable authorization middleware (even if not used yet)
-// This is common in enterprise APIs
+// Enables authorization middleware
+// (even if no auth is configured yet)
 app.UseAuthorization();
 
-// -------------------- ROUTING --------------------
+// ------------------------------------------------------------
+// 6️⃣ Configure routing
+// ------------------------------------------------------------
 
-// Map all controller routes (CRITICAL)
-// Without this, /api/workflows will return 404
+// Maps controller routes like:
+// GET /api/workflows
+// POST /api/workflows
 app.MapControllers();
 
-// -------------------- START APPLICATION --------------------
-
-// Start the web server (Kestrel)
+// ------------------------------------------------------------
+// 7️⃣ Start the application
+// ------------------------------------------------------------
+// Starts Kestrel and begins listening on port 2535
 app.Run();

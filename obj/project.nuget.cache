@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "rio9kLJyu0Q=",
+  "dgSpecHash": "TlCAIibyHvA=",
   "success": true,
-  "projectFilePath": "D:\\owm\\kvs.classic.api\\kvs.classic.api.csproj",
+  "projectFilePath": "D:\\OWM\\kvs.classic.api\\kvs.classic.api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\KVS\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.23\\microsoft.aspnetcore.openapi.8.0.23.nupkg.sha512",
     "C:\\Users\\KVS\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",

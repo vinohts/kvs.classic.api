@@ -19,7 +19,7 @@ namespace kvs.classic.api.Controllers
         public IActionResult Get()
         {
             // Simple response to confirm routing works
-            return Ok("KVS Workflow API is working");
+            return Ok("KVS Classic API Version 1.0 Deployed by ECS");
         }
     }
 }

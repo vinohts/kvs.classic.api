@@ -31,3 +31,4 @@ D:\OWM\kvs.classic.api\obj\Debug\net8.0\refint\kvs.classic.api.dll
 D:\OWM\kvs.classic.api\obj\Debug\net8.0\kvs.classic.api.pdb
 D:\OWM\kvs.classic.api\obj\Debug\net8.0\kvs.classic.api.genruntimeconfig.cache
 D:\OWM\kvs.classic.api\obj\Debug\net8.0\ref\kvs.classic.api.dll
+D:\OWM\kvs.classic.api\obj\Debug\net8.0\kvs.classic.api.sourcelink.json
