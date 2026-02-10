@@ -1,13 +1,12 @@
 name: .NET Dev Deploy (Windows Runner)
 
 on:
-  push:
-    branches:
-      - main
+    workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: self-hosted
+    environment: dev
 
     steps:
       - name: Checkout repository
