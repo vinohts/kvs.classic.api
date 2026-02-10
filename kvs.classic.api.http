@@ -1,0 +1,6 @@
+@kvs.classic.api_HostAddress = http://localhost:5279
+
+GET {{kvs.classic.api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
