@@ -1,0 +1,56 @@
+name: .NET Dev Deploy (Windows Runner)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Runner info
+        shell: powershell
+        run: |
+          hostname
+          whoami
+          dotnet --version
+
+      - name: Restore dependencies
+        shell: powershell
+        run: |
+          cd D:\owm\kvs.classic.api
+          dotnet restore
+
+      - name: Build API
+        shell: powershell
+        run: |
+          cd D:\owm\kvs.classic.api
+          dotnet build --configuration Release --no-restore
+
+      - name: Publish API
+        shell: powershell
+        run: |
+          cd D:\owm\kvs.classic.api
+          dotnet publish `
+            --configuration Release `
+            --output D:\kvs-publish
+
+      - name: Restart API
+        shell: powershell
+        run: |
+          $dll = "D:\kvs-publish\kvs.classic.api.dll"
+
+          if (Get-Process dotnet -ErrorAction SilentlyContinue) {
+            Stop-Process -Name dotnet -Force
+            Start-Sleep -Seconds 2
+          }
+
+          Start-Process `
+            -FilePath "dotnet" `
+            -ArgumentList $dll `
+            -WorkingDirectory "D:\kvs-publish"
