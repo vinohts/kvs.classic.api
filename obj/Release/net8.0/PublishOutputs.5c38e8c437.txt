@@ -1,0 +1,12 @@
+D:\kvs-publish\kvs.classic.api.exe
+D:\kvs-publish\appsettings.Development.json
+D:\kvs-publish\appsettings.json
+D:\kvs-publish\kvs.classic.api.dll
+D:\kvs-publish\kvs.classic.api.deps.json
+D:\kvs-publish\kvs.classic.api.runtimeconfig.json
+D:\kvs-publish\kvs.classic.api.pdb
+D:\kvs-publish\Microsoft.AspNetCore.OpenApi.dll
+D:\kvs-publish\Microsoft.OpenApi.dll
+D:\kvs-publish\Swashbuckle.AspNetCore.Swagger.dll
+D:\kvs-publish\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\kvs-publish\Swashbuckle.AspNetCore.SwaggerUI.dll

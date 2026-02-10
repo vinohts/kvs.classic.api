@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "ypAhOAJ8NL+WGJsKUTW7WrpxPa4Wpb2VFRS4nj35ync=",
+  "Source": "kvs.classic.api",
+  "BasePath": "_content/kvs.classic.api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

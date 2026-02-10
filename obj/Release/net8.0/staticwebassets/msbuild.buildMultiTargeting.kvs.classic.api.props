@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\kvs.classic.api.props" />
+</Project>
