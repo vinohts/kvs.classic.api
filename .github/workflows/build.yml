@@ -63,15 +63,26 @@ jobs:
       - name: Push Latest Image
         run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
 
-      # 9️⃣ Register New ECS Task Definition Revision with Specific Image
+      # 9️⃣ Register New ECS Task Definition Revision
       - name: Register New ECS Task Definition
         run: |
           aws ecs register-task-definition \
             --family $ECS_SERVICE \
-            --container-definitions "[{\"name\":\"$ECS_SERVICE\",\"image\":\"${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}\",\"portMappings\":[{\"containerPort\":2535,\"protocol\":\"tcp\"}]}]" \
+            --container-definitions "[{
+              \"name\":\"$ECS_SERVICE\",
+              \"image\":\"${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}\",
+              \"cpu\":256,
+              \"memory\":512,
+              \"essential\":true,
+              \"portMappings\":[{\"containerPort\":2535,\"protocol\":\"tcp\"}]
+            }]" \
+            --requires-compatibilities "FARGATE" \
+            --network-mode "awsvpc" \
+            --cpu "256" \
+            --memory "512" \
             --region $AWS_REGION
 
-      # 🔟 Update ECS Service to Use New Revision
+      # 🔟 Update ECS Service to New Task Definition Revision
       - name: Update ECS Service
         run: |
           NEW_REVISION=$(aws ecs describe-task-definition \
@@ -86,7 +97,7 @@ jobs:
             --force-new-deployment \
             --region $AWS_REGION
 
-      # 1️⃣1️⃣ Wait for ECS Service Stability
+      # 1️⃣1️⃣ Wait for ECS Service to Stabilize
       - name: Wait for ECS Deployment to Stabilize
         run: |
           echo "Waiting for ECS service to become stable..."
@@ -96,7 +107,7 @@ jobs:
             --region $AWS_REGION
           echo "ECS service is stable ✅"
 
-      # 1️⃣2️⃣ Print final info
+      # 1️⃣2️⃣ Print Deployment Info
       - name: Print Deployment Info
         run: |
           echo "Image deployed: ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}"
