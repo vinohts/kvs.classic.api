@@ -17,7 +17,7 @@ namespace kvs.classic.api.Controllers
         {
             return Ok(new
             {
-                message = "KVS Classic API Deployed Successfully",
+                message = "KVS Classic API Deployed by ECS",
                 version = "2.0",
                 status = "Running",
                 timestampUtc = DateTime.UtcNow
