@@ -1,25 +1,56 @@
 using Microsoft.AspNetCore.Mvc;
 
-// Namespace must match project name
-// Otherwise controller will not be discovered
 namespace kvs.classic.api.Controllers
 {
-    // Marks this as an API controller
-    // Enables automatic model binding & validation
     [ApiController]
 
-    // Base route for this controller
+    // Standard REST route
     // Final URL: /api/workflows
-    [Route("kvs/api/workflows")]
+    [Route("api/[controller]")]
     public class WorkflowController : ControllerBase
     {
-        // Handles HTTP GET requests
-        // GET /api/workflows
+        /// <summary>
+        /// GET: api/workflows
+        /// </summary>
         [HttpGet]
         public IActionResult Get()
         {
-            // Simple response to confirm routing works
-            return Ok("KVS Classic API Version 3.0 Deployed by ECS");
+            return Ok(new
+            {
+                message = "KVS Classic API Deployed Successfully",
+                version = "2.0",
+                status = "Running",
+                timestampUtc = DateTime.UtcNow
+            });
+        }
+
+        /// <summary>
+        /// GET: api/workflows/{id}
+        /// </summary>
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            return Ok(new
+            {
+                workflowId = id,
+                name = "Sample Workflow",
+                status = "Active",
+                createdOnUtc = DateTime.UtcNow.AddDays(-5)
+            });
+        }
+
+        /// <summary>
+        /// POST: api/workflows
+        /// </summary>
+        [HttpPost]
+        public IActionResult Create([FromBody] object workflow)
+        {
+            return Ok(new
+            {
+                message = "Workflow created successfully",
+                data = workflow,
+                createdOnUtc = DateTime.UtcNow
+            });
         }
     }
 }

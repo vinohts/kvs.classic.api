@@ -1,80 +1,90 @@
 // ------------------------------------------------------------
-// Program.cs
-// Entry point of the .NET 8 Web API application
+// Program.cs - .NET 8 Web API (Local + Docker + ECS Ready)
 // ------------------------------------------------------------
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-// ------------------------------------------------------------
-// 1️⃣ Create the application builder
-// ------------------------------------------------------------
-// This initializes:
-// - Dependency Injection (DI)
-// - Configuration (appsettings.json, env vars)
-// - Logging
-// - Kestrel web server
 var builder = WebApplication.CreateBuilder(args);
 
 // ------------------------------------------------------------
-// 2️⃣ Configure Kestrel (CRITICAL FOR DOCKER / ECS)
+// 1️⃣ Configure Kestrel (Required for Docker / ECS)
 // ------------------------------------------------------------
-// Listen on port 2535 on ALL network interfaces (0.0.0.0)
-//
-// Why?
-// - Docker containers do NOT use localhost
-// - ECS + ALB need the app exposed externally
-// - Matches Dockerfile EXPOSE 2535
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(2535);
 });
 
 // ------------------------------------------------------------
-// 3️⃣ Register services (Dependency Injection)
+// 2️⃣ Services Registration
 // ------------------------------------------------------------
 
-// Registers MVC controllers (enables [ApiController])
+// Controllers
 builder.Services.AddControllers();
 
-// Enables Swagger endpoint discovery
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
-
-// Generates Swagger/OpenAPI documentation
 builder.Services.AddSwaggerGen();
 
 // ------------------------------------------------------------
-// 4️⃣ Build the application
+// CORS Policy (LOCAL + CLOUD SUPPORT)
 // ------------------------------------------------------------
-// Finalizes the service container and middleware pipeline
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowCalculator", policy =>
+    {
+        policy
+            .WithOrigins(
+                // 🌍 Production Domains
+                "https://itops.fun",
+                "https://www.itops.fun",
+
+                // 🖥 Local Browser Testing
+                "http://localhost:9595",
+                "http://localhost:2535",
+
+                // 🐳 Docker Desktop (Windows/Mac)
+                "http://host.docker.internal:9595"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // ------------------------------------------------------------
-// 5️⃣ Configure middleware (HTTP pipeline)
+// 3️⃣ Middleware Pipeline
 // ------------------------------------------------------------
 
-// Enables Swagger JSON endpoint (/swagger/v1/swagger.json)
+// Swagger (Available everywhere for now)
 app.UseSwagger();
-
-// Enables Swagger UI (/swagger)
 app.UseSwaggerUI();
 
-// Enables authorization middleware
-// (even if no auth is configured yet)
+// 🔥 CORS MUST COME BEFORE AUTHORIZATION
+app.UseCors("AllowCalculator");
+
 app.UseAuthorization();
 
-// ------------------------------------------------------------
-// 6️⃣ Configure routing
-// ------------------------------------------------------------
-
-// Maps controller routes like:
-// GET /api/workflows
-// POST /api/workflows
+// Map Controllers
 app.MapControllers();
 
 // ------------------------------------------------------------
-// 7️⃣ Start the application
+// 4️⃣ Health Check Endpoint
 // ------------------------------------------------------------
-// Starts Kestrel and begins listening on port 2535
+app.MapGet("/health", () =>
+{
+    return Results.Ok(new
+    {
+        status = "Healthy",
+        version = "2.0",
+        environment = app.Environment.EnvironmentName,
+        serverTimeUtc = DateTime.UtcNow
+    });
+});
+
+// ------------------------------------------------------------
+// 5️⃣ Start Application
+// ------------------------------------------------------------
 app.Run();

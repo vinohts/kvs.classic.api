@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\owm\\kvs.classic.api\\kvs.classic.api.csproj": {}
+    "D:\\X008926\\kvs.classic.api\\kvs.classic.api.csproj": {}
   },
   "projects": {
-    "D:\\owm\\kvs.classic.api\\kvs.classic.api.csproj": {
+    "D:\\X008926\\kvs.classic.api\\kvs.classic.api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\owm\\kvs.classic.api\\kvs.classic.api.csproj",
+        "projectUniqueName": "D:\\X008926\\kvs.classic.api\\kvs.classic.api.csproj",
         "projectName": "kvs.classic.api",
-        "projectPath": "D:\\owm\\kvs.classic.api\\kvs.classic.api.csproj",
+        "projectPath": "D:\\X008926\\kvs.classic.api\\kvs.classic.api.csproj",
         "packagesPath": "C:\\Users\\KVS\\.nuget\\packages\\",
-        "outputPath": "D:\\owm\\kvs.classic.api\\obj\\",
+        "outputPath": "D:\\X008926\\kvs.classic.api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\KVS\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -71,7 +71,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.417/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.418/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
