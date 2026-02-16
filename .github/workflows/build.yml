@@ -1,4 +1,4 @@
-name: API Build & Deploy to ECS
+name: API Build, Push & Deploy to ECS
 
 on:
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4️⃣ Set Image Version
+      # 4️⃣ Set Image Tag
       - name: Set Image Tag
         id: version
         run: echo "tag=v1.${{ github.run_number }}" >> $GITHUB_OUTPUT
@@ -64,7 +64,7 @@ jobs:
       - name: Push Latest Image
         run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
 
-      # 🔟 Trigger ECS Deployment
+      # 🔟 Update ECS Service (Force Deployment)
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
@@ -73,8 +73,18 @@ jobs:
             --force-new-deployment \
             --region $AWS_REGION
 
-      # 1️⃣1️⃣ Print Info
+      # 1️⃣1️⃣ Wait for ECS Service Stability
+      - name: Wait for ECS Deployment to Stabilize
+        run: |
+          echo "Waiting for ECS service to become stable..."
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE \
+            --region $AWS_REGION
+          echo "ECS service is stable ✅"
+
+      # 1️⃣2️⃣ Print final info
       - name: Print Deployment Info
         run: |
-          echo "Image pushed: ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}"
-          echo "Deployment triggered for ECS service: $ECS_SERVICE"
+          echo "Image deployed: ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}"
+          echo "Deployment completed successfully 🚀"
