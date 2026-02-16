@@ -77,7 +77,7 @@ app.MapGet("/health", () =>
 {
     return Results.Ok(new
     {
-        status = "Healthy",
+        status = "Ok",
         version = "2.0",
         environment = app.Environment.EnvironmentName,
         serverTimeUtc = DateTime.UtcNow
