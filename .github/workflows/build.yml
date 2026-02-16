@@ -50,26 +50,39 @@ jobs:
           docker tag $ECR_REPOSITORY:${{ steps.version.outputs.tag }} \
           ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}
 
-      # 7️⃣ Tag Docker Image as latest
+      # 7️⃣ Push Version Tag to ECR
+      - name: Push Version Image
+        run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}
+
+      # 8️⃣ Optional: Tag Latest
       - name: Tag Latest Image
         run: |
           docker tag $ECR_REPOSITORY:${{ steps.version.outputs.tag }} \
           ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
 
-      # 8️⃣ Push Version Tag
-      - name: Push Version Image
-        run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}
-
-      # 9️⃣ Push Latest Tag
       - name: Push Latest Image
         run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
 
-      # 🔟 Update ECS Service (Force Deployment)
-      - name: Deploy to ECS
+      # 9️⃣ Register New ECS Task Definition Revision with Specific Image
+      - name: Register New ECS Task Definition
         run: |
+          aws ecs register-task-definition \
+            --family $ECS_SERVICE \
+            --container-definitions "[{\"name\":\"$ECS_SERVICE\",\"image\":\"${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}\",\"portMappings\":[{\"containerPort\":2535,\"protocol\":\"tcp\"}]}]" \
+            --region $AWS_REGION
+
+      # 🔟 Update ECS Service to Use New Revision
+      - name: Update ECS Service
+        run: |
+          NEW_REVISION=$(aws ecs describe-task-definition \
+            --task-definition $ECS_SERVICE \
+            --region $AWS_REGION \
+            --query 'taskDefinition.revision' \
+            --output text)
           aws ecs update-service \
             --cluster $ECS_CLUSTER \
             --service $ECS_SERVICE \
+            --task-definition "$ECS_SERVICE:$NEW_REVISION" \
             --force-new-deployment \
             --region $AWS_REGION
 
