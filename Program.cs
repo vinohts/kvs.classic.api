@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ------------------------------------------------------------
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(2535);
+    options.ListenAnyIP(80);
 });
 
 // ------------------------------------------------------------
