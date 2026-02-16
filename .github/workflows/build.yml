@@ -30,7 +30,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-       - name: Set Image Tag
+      - name: Set Image Tag
         id: version
         run: echo "tag=v1.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
