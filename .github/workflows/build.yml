@@ -1,11 +1,11 @@
-name: API Manual Build & Push to ECR
+name: API Build & Deploy to ECS
 
 on:
   workflow_dispatch:
 
 jobs:
-  build-and-push:
-    name: Build and Push Docker Image
+  build-and-deploy:
+    name: Build, Push & Deploy Docker Image
     runs-on: ubuntu-latest
 
     permissions:
@@ -15,45 +15,66 @@ jobs:
     env:
       AWS_REGION: ${{ vars.AWS_REGION }}
       ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+      ECS_SERVICE: ${{ vars.ECS_SERVICE }}
 
     steps:
+      # 1️⃣ Checkout source code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Configure AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      # 3️⃣ Login to Amazon ECR
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # 4️⃣ Set Image Version
       - name: Set Image Tag
         id: version
         run: echo "tag=v1.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
+      # 5️⃣ Build Docker Image
       - name: Build Docker Image
         run: docker build -t $ECR_REPOSITORY:${{ steps.version.outputs.tag }} .
 
+      # 6️⃣ Tag Docker Image (version)
       - name: Tag Version Image
         run: |
           docker tag $ECR_REPOSITORY:${{ steps.version.outputs.tag }} \
           ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}
 
+      # 7️⃣ Tag Docker Image as latest
       - name: Tag Latest Image
         run: |
           docker tag $ECR_REPOSITORY:${{ steps.version.outputs.tag }} \
           ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
 
+      # 8️⃣ Push Version Tag
       - name: Push Version Image
         run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}
 
+      # 9️⃣ Push Latest Tag
       - name: Push Latest Image
         run: docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:latest
 
-      - name: Print Image Info
+      # 🔟 Trigger ECS Deployment
+      - name: Deploy to ECS
         run: |
-          echo "Version: v1.${{ github.run_number }}"
-          echo "Image pushed successfully"
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment \
+            --region $AWS_REGION
+
+      # 1️⃣1️⃣ Print Info
+      - name: Print Deployment Info
+        run: |
+          echo "Image pushed: ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ steps.version.outputs.tag }}"
+          echo "Deployment triggered for ECS service: $ECS_SERVICE"
