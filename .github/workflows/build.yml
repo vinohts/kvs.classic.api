@@ -1,11 +1,7 @@
-name: API - Manual Build & Push to ECR
+name: API Manual Build & Push to ECR
 
 on:
   workflow_dispatch:
-
-env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
-  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
 
 jobs:
   build-and-push:
@@ -16,17 +12,26 @@ jobs:
       id-token: write
       contents: read
 
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+
     steps:
-      # 1️⃣ Checkout source code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Configure AWS credentials using OIDC
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      # 3️⃣ Login to Amazon ECR
       - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set Image Version
+        run: echo "IMAGE_TAG=v1.${{ github.run_number }}" >> $GITHUB_ENV
+
+      - name: Build Docker Image
+        run: docker build -t $ECR_REPOSITORY:$I_
