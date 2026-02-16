@@ -80,6 +80,7 @@ jobs:
             --network-mode "awsvpc" \
             --cpu "256" \
             --memory "512" \
+            --execution-role-arn "arn:aws:iam::758890598841:role/ecsTaskExecutionRole" \
             --region $AWS_REGION
 
       # 🔟 Update ECS Service to New Task Definition Revision
